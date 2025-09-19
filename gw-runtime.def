@@ -1,0 +1,53 @@
+Bootstrap: docker
+From: intel/oneapi-runtime:2024.2.0-devel-ubuntu20.04
+
+%help
+    This container is based on the official Intel oneAPI Runtime image:
+    intel/oneapi-runtime:2024.2.0-devel-ubuntu20.04
+
+    It includes the necessary libraries and tools for running applications
+    built with the Intel oneAPI toolkits.
+
+%files
+    # This copies the 'app' directory from your host (where you extracted it)
+    # into the /opt/ directory inside the new container.
+    # ./spack-stack /opt/
+    ./aws-cli /usr/local/
+    spack-stack.tar.gz /opt/
+    global-workflow-cloud.tar.gz /opt/
+    lmod.tar.gz /usr/
+
+%post
+    # Go to the directory where the tarball was copied
+    cd /opt
+
+    # Extract the archive. This will correctly recreate the directory
+    # structure and all its symbolic links inside the container.
+    tar -xzf spack-stack.tar.gz
+
+    # Optional: Clean up by removing the tarball to save space
+    rm spack-stack.tar.gz
+
+    echo "Spack-stack environment extracted successfully."
+    # You can add other setup commands here, like adding spack to the PATH
+    # echo 'export PATH=/opt/spack-stack/bin:$PATH' >> $SINGULARITY_ENVIRONMENT
+
+    tar -xzf global-workflow-cloud.tar.gz
+
+    # Optional: Clean up by removing the tarball to save space
+    rm global-workflow-cloud.tar.gz
+
+    cd /usr
+    tar -xzf lmod.tar.gz
+    rm lmod.tar.gz
+
+%environment
+    # The official Intel Docker image already sets up the environment,
+    # but we can source this to ensure it's always active.
+    # The > /dev/null prevents the script's output from cluttering the console.
+    source /opt/intel/oneapi/setvars.sh --force > /dev/null
+
+%runscript
+    echo "Container based on intel/oneapi-runtime:2024.2.0-devel-ubuntu20.04"
+    echo "The oneAPI environment is active. Pass a command to run it."
+    exec "$@"

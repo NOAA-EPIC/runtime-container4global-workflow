@@ -1,0 +1,18 @@
+Bootstrap: localimage
+From: ./gw-runtime.sif
+
+%help
+    This container adds new_data_directory to the original container.
+
+%files
+    # This copies 'new_data_directory' from your host
+    # into the /opt/ directory inside the new container.
+    ./lmod /usr/
+    ./aws-cli.tar.gz /usr/local
+
+%post
+    # Go to the directory where the tarball was copied
+    cd /usr/local
+    tar -xzf aws-cli.tar.gz
+    rm aws-cli.tar.gz
+

@@ -1,0 +1,20 @@
+Bootstrap: docker
+From: intel/oneapi-runtime:2024.2.0-devel-ubuntu20.04
+
+%help
+    This container is based on the official Intel oneAPI Runtime image:
+    intel/oneapi-runtime:2024.2.0-devel-ubuntu20.04
+
+    It includes the necessary libraries and tools for running applications
+    built with the Intel oneAPI toolkits.
+
+%environment
+    # The official Intel Docker image already sets up the environment,
+    # but we can source this to ensure it's always active.
+    # The > /dev/null prevents the script's output from cluttering the console.
+    source /opt/intel/oneapi/setvars.sh > /dev/null
+
+%runscript
+    echo "Container based on intel/oneapi-runtime:2024.2.0-devel-ubuntu20.04"
+    echo "The oneAPI environment is active. Pass a command to run it."
+    exec "$@"
