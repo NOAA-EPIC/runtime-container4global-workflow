@@ -12,10 +12,10 @@ From: intel/oneapi-runtime:2024.2.0-devel-ubuntu20.04
     # This copies the 'app' directory from your host (where you extracted it)
     # into the /opt/ directory inside the new container.
     # ./spack-stack /opt/
-    ./aws-cli /usr/local/
     spack-stack.tar.gz /opt/
     global-workflow-cloud.tar.gz /opt/
     lmod.tar.gz /usr/
+    aws-cli.tar.gz /usr/local/
 
 %post
     # Go to the directory where the tarball was copied
@@ -40,6 +40,10 @@ From: intel/oneapi-runtime:2024.2.0-devel-ubuntu20.04
     cd /usr
     tar -xzf lmod.tar.gz
     rm lmod.tar.gz
+
+    cd /usr/local
+    tar -xzf aws-cli.tar.gz
+    rm aws-cli.tar.gz
 
 %environment
     # The official Intel Docker image already sets up the environment,
