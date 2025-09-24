@@ -5,3 +5,5 @@ lmod.tar.gz
 spack-stack.tar.gz
 global-workflow-cloud
 spack-stack
+gw-runtime.sif
+lua

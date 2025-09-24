@@ -14,8 +14,10 @@ From: intel/oneapi-runtime:2024.2.0-devel-ubuntu20.04
     # ./spack-stack /opt/
     spack-stack.tar.gz /opt/
     global-workflow-cloud.tar.gz /opt/
-    lmod.tar.gz /usr/
-    aws-cli.tar.gz /usr/local/
+    # lmod.tar.gz /usr/
+    # aws-cli.tar.gz /usr/local/
+    usr.tar.gz /
+    var.tar.gz /
 
 %post
     # Go to the directory where the tarball was copied
@@ -37,13 +39,13 @@ From: intel/oneapi-runtime:2024.2.0-devel-ubuntu20.04
     # Optional: Clean up by removing the tarball to save space
     rm global-workflow-cloud.tar.gz
 
-    cd /usr
-    tar -xzf lmod.tar.gz
-    rm lmod.tar.gz
+    cd /
+    tar -xzf usr.tar.gz
+    rm usr.tar.gz
 
-    cd /usr/local
-    tar -xzf aws-cli.tar.gz
-    rm aws-cli.tar.gz
+    cd /
+    tar -xzf var.tar.gz
+    rm var.tar.gz
 
 %environment
     # The official Intel Docker image already sets up the environment,

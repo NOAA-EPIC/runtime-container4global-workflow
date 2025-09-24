@@ -16,31 +16,6 @@ Stage: builder
     mkdir -p /opt
     cd /opt
 
-    # Clone the repository and checkout the correct branch/submodules
-    git clone https://github.com/NOAA-EPIC/global-workflow-cloud.git
-    cd global-workflow-cloud
-    git checkout feature/use_container_spack-stack-1.9.2
-    git submodule update --init --recursive
-
-    # Checkout specific develop branches for key submodules
-    cd sorc/gfs_utils.fd && git checkout develop && cd -
-    cd sorc/ufs_utils.fd && git checkout develop && cd -
-    cd sorc/ufs_model.fd
-    git checkout develop
-    git submodule update --init --recursive
-    cd UFSATM/upp && git checkout develop
-
-    # Load the build environment
-    source /usr/lmod/lmod/init/bash
-    module purge
-
-    # Build the executables from the sorc directory
-    cd /opt/global-workflow-cloud/sorc
-    ./build_all.sh gfs
-    ./build_ufs.sh gefs
-    ./build_ufs.sh sfs
-    # ./link_workflow.sh
-
     # Create common mount points needed for HPC environments
     mkdir -p /contrib /lustre /scratch /scratch3 /scratch4 /mnt /Users
 
@@ -57,10 +32,21 @@ Stage: final
 
 %files from builder
     # Copy the compiled application and its Spack-Stack dependencies
-    /opt/global-workflow-cloud /opt/global-workflow-cloud
+    #/opt/global-workflow-cloud /opt/global-workflow-cloud
+    /usr/lmod /usr/lmod
+    /usr/local/aws-cli /usr/local/aws-cli
     /opt/spack-stack /opt/spack-stack
-    #/usr/lmod /usr/lmod
-    #/usr/local/asw-cli /usr/local/asw-cli
+    /usr/bin/lua /usr/bin/lua
+    /usr/lib/lua /usr/lib/lua
+    /usr/share/lua /usr/share/lua
+    /usr/lmod/lmod/libexec/lmo /usr/lmod/lmod/libexec/lmo
+    /usr/lmod/lmod/libexec/addto /usr/lmod/lmod/libexec/addto
+    /usr/lib/x86_64-linux-gnu/libmpi.so.40 /usr/lib/x86_64-linux-gnu/libmpi.so.40
+    /usr/lib/x86_64-linux-gnu/libopen-rte.so.40 /usr/lib/x86_64-linux-gnu/libopen-rte.so.40
+    /usr/lib/x86_64-linux-gnu/libopen-pal.so.40 /usr/lib/x86_64-linux-gnu/libopen-pal.so.40
+    /usr/lib/x86_64-linux-gnu/libevent_core-2.1.so.7 /usr/lib/x86_64-linux-gnu/libevent_core-2.1.so.7
+    /usr/lib/x86_64-linux-gnu/libevent_pthreads-2.1.so.7 /usr/lib/x86_64-linux-gnu/libevent_pthreads-2.1.so.7
+    /etc/localtime /etc/localtime
     #/root /root # Be cautious with this; copy only what's necessary.
     #/var /var
 
