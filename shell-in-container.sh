@@ -2,10 +2,10 @@
 
 set -x
 
-sif=ubuntu22.04-intel-ufs-env-v1.9.2.img
+sif=intel-hpc-2024.2-mpi-2021.13-ss192
 
-img=/contrib/containers/${sif}
-bindings="-B /contrib"
+img=./${sif}
+bindings="-B /contrib:/contrib"
 
-singularity shell -e ${bindings} "${img}"
+sudo singularity shell --writable -e ${bindings} "${img}"
 
