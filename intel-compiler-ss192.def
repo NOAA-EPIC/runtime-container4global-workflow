@@ -4,7 +4,7 @@
 # - Clones and builds the global-workflow application.
 ################################################################################
 Bootstrap: localimage
-From: ./ubuntu22.04-intel-ufs-env-v1.9.2.img
+From: ./intel-hpc-2024.2-mpi-2021.13-ss192.sif
 Stage: builder
 
 %post
@@ -19,7 +19,6 @@ Stage: builder
     # Create common mount points needed for HPC environments
     mkdir -p /contrib /lustre /scratch /scratch3 /scratch4 /mnt /Users
 
-
 ################################################################################
 # Stage 2: Final
 # - Starts from a minimal Intel oneAPI runtime image.
@@ -27,25 +26,21 @@ Stage: builder
 #   builder stage, creating a much smaller and cleaner final container.
 ################################################################################
 Bootstrap: docker
-From: intel/oneapi-runtime:2024.2.0-1-devel-ubuntu22.04
+From: intel/hpckit:2024.2.0-1-devel-ubuntu22.04
 Stage: final
 
 %files from builder
     # Copy the compiled application and its Spack-Stack dependencies
     #/opt/global-workflow-cloud /opt/global-workflow-cloud
-    /usr/lmod /usr/lmod
+   #/usr/lmod /usr/lmod
+   #/opt/spack-stack /opt/spack-stack
     /usr/local/aws-cli /usr/local/aws-cli
-    /opt/spack-stack /opt/spack-stack
     /usr/bin/time /usr/bin/time
     /usr/bin/bc /usr/bin/bc
     /usr/bin/lua /usr/bin/lua
     /usr/lib/lua /usr/lib/lua
     /usr/share/lua /usr/share/lua
-    /usr/lib/x86_64-linux-gnu/libmpi.so.40 /usr/lib/x86_64-linux-gnu/libmpi.so.40
-    /usr/lib/x86_64-linux-gnu/libopen-rte.so.40 /usr/lib/x86_64-linux-gnu/libopen-rte.so.40
-    /usr/lib/x86_64-linux-gnu/libopen-pal.so.40 /usr/lib/x86_64-linux-gnu/libopen-pal.so.40
-    /usr/lib/x86_64-linux-gnu/libevent_core-2.1.so.7 /usr/lib/x86_64-linux-gnu/libevent_core-2.1.so.7
-    /usr/lib/x86_64-linux-gnu/libevent_pthreads-2.1.so.7 /usr/lib/x86_64-linux-gnu/libevent_pthreads-2.1.so.7
+    /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu
     /etc/localtime /etc/localtime
     #/root /root # Be cautious with this; copy only what's necessary.
     #/var /var
@@ -72,8 +67,8 @@ Stage: final
     # Set the runtime environment for the final container.
     # This is the proper place to source scripts and set variables.
     export SHELL=/bin/bash
-    source /usr/lmod/lmod/init/bash
-    module purge
+   #source /usr/lmod/lmod/init/bash
+   #module purge
 
 %runscript
     # This is the default command executed when you run the container.

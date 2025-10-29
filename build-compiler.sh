@@ -26,4 +26,4 @@
 
 #sudo singularity build intel-hpc-2024.2-mpi-2021.13-ss192.sif runtime-ss192.def
 
- sudo singularity build intel-runtime-ss192.sif runtime-ss192-simple.def
+ sudo singularity build intel-compiler-ss192.sif intel-compiler-ss192.def
