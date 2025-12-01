@@ -32,16 +32,19 @@ Stage: final
 %files from builder
     # Copy the compiled application and its Spack-Stack dependencies
     #/opt/global-workflow-cloud /opt/global-workflow-cloud
-   #/usr/lmod /usr/lmod
-   #/opt/spack-stack /opt/spack-stack
+    /usr/lmod /usr/lmod
+    #/opt/spack-stack /opt/spack-stack
     /usr/local/aws-cli /usr/local/aws-cli
     /usr/bin/time /usr/bin/time
     /usr/bin/bc /usr/bin/bc
     /usr/bin/lua /usr/bin/lua
+    /usr/bin/envsubst /usr/bin/envsubst
+    /usr/bin/rsync /usr/bin/rsync
     /usr/lib/lua /usr/lib/lua
     /usr/share/lua /usr/share/lua
     /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu
     /etc/localtime /etc/localtime
+    /usr/include/zlib.h /usr/include/zlib.h
     #/root /root # Be cautious with this; copy only what's necessary.
     #/var /var
 
