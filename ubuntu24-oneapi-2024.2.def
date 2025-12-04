@@ -1,0 +1,77 @@
+Bootstrap: docker
+From: ubuntu:24.04
+
+%labels
+    Author="Wei Huang"
+    OS="Ubuntu 24.04"
+    Intel-OneAPI="2024.2"
+    Intel-MPI="2021.13"
+    Description="Ubuntu 24.04 with Intel OneAPI (Base+HPC) and Intel MPI for AWS HPC"
+
+%environment
+    # Ensure Intel environment is loaded when container starts
+    source /opt/intel/oneapi/setvars.sh > /dev/null 2>&1
+
+    # MPI behavior
+    export I_MPI_DEBUG=0
+    export I_MPI_OFI_PROVIDER="tcp;verbs;shm"
+    export FI_PROVIDER="tcp;verbs;shm"
+    export PATH=/opt/intel/oneapi/mpi/2021.13.0/bin:$PATH
+    export LD_LIBRARY_PATH=/opt/intel/oneapi/mpi/2021.13.0/lib:$LD_LIBRARY_PATH
+
+%post
+    export DEBIAN_FRONTEND=noninteractive
+
+    echo "==== Updating base system ===="
+    apt-get update && apt-get install -y \
+        build-essential \
+        cmake \
+        git \
+        wget \
+        curl \
+        unzip \
+        ca-certificates \
+        python3 python3-pip python3-dev \
+        libnuma1 libnuma-dev \
+        libfabric1 libfabric-dev \
+        openssh-client \
+        && apt-get clean
+
+    # ------------------------------------------------------------------
+    # Install Intel OneAPI repo (modern supported method)
+    # ------------------------------------------------------------------
+    echo "==== Installing Intel OneAPI repo ===="
+
+    mkdir -p /etc/apt/keyrings
+    wget -O /etc/apt/keyrings/intel-oneapi.asc \
+        https://apt.repos.intel.com/oneapi/intel-oneapi.gpg
+
+    chmod 644 /etc/apt/keyrings/intel-oneapi.asc
+
+    echo "deb [signed-by=/etc/apt/keyrings/intel-oneapi.asc] https://apt.repos.intel.com/oneapi all main" \
+        > /etc/apt/sources.list.d/oneapi.list
+
+    apt-get update
+
+    # ------------------------------------------------------------------
+    # Install Intel OneAPI Toolkits (Base + HPC)
+    # ------------------------------------------------------------------
+    echo "==== Installing OneAPI Base + HPC toolkit ===="
+
+    apt-get install -y \
+        intel-basekit \
+        intel-hpckit
+
+    # ------------------------------------------------------------------
+    # Persistent environment
+    # ------------------------------------------------------------------
+    echo "source /opt/intel/oneapi/setvars.sh > /dev/null 2>&1" >> /environment
+
+    # Make sure PATH/LD_LIBRARY_PATH are present on login
+    echo 'export PATH=/opt/intel/oneapi/mpi/2021.13.0/bin:$PATH' >> /environment
+    echo 'export LD_LIBRARY_PATH=/opt/intel/oneapi/mpi/2021.13.0/lib:$LD_LIBRARY_PATH' >> /environment
+
+%runscript
+    echo "Intel OneAPI Container - AWS HPC Ready"
+    exec /bin/bash
+

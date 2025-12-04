@@ -1,0 +1,57 @@
+Bootstrap: docker
+From: ubuntu:24.04
+
+%labels
+    Author="Wei Huang"
+    OS="Ubuntu 24.04"
+    Intel-OneAPI="2024.2"
+    Intel-MPI="2021.x"
+    Description="Ubuntu 24.04 with Intel oneAPI and Intel MPI (APT install) for AWS"
+
+%environment
+    # Load Intel environment on container start
+    source /opt/intel/oneapi/setvars.sh > /dev/null 2>&1
+    export I_MPI_DEBUG=0
+    export I_MPI_OFI_PROVIDER="tcp;verbs;shm"
+    export FI_PROVIDER="tcp;verbs;shm"
+    export PATH=/opt/intel/oneapi/mpi/latest/bin:$PATH
+    export LD_LIBRARY_PATH=/opt/intel/oneapi/mpi/latest/lib:$LD_LIBRARY_PATH
+
+%post
+    export DEBIAN_FRONTEND=noninteractive
+
+    apt-get update && apt-get install -y \
+        build-essential \
+        cmake \
+        git wget curl unzip ca-certificates \
+        python3 python3-dev python3-pip \
+        libnuma1 libnuma-dev libfabric1 libfabric-dev \
+        openssh-client \
+        gnupg lsb-release \
+        && apt-get clean
+
+    # ------ Configure Intel oneAPI APT repository ------
+    # As per Intel official APT instructions (2025)
+    wget -qO- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
+        | gpg --dearmor \
+        | tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
+
+    echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" \
+         > /etc/apt/sources.list.d/oneapi.list
+
+    apt-get update
+
+    # Install base + HPC toolkits (includes compilers, MPI, etc.)
+    apt-get install -y intel-basekit intel-hpckit
+
+    # Clean up
+    apt-get clean
+    rm -rf /var/lib/apt/lists/*
+
+    # Persist environment load
+    echo "source /opt/intel/oneapi/setvars.sh > /dev/null 2>&1" >> /environment
+
+%runscript
+    echo "Entering Intel oneAPI container (Ubuntu 24.04)"
+    exec /bin/bash
+

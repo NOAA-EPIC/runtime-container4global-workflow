@@ -14,7 +14,8 @@
 
  set -x
 
- sudo singularity build ubuntu-intel.sif ubuntu-intel.def
+#sudo singularity build ubuntu24-oneapi-2024.2-aws.sif ubuntu24-oneapi-2024.2-aws.def
+ sudo singularity build --sandbox ubuntu24-oneapi-2024.2-aws ubuntu24-oneapi-2024.2-aws.sif
 
 #singularity exec ubuntu-intel.sif bash -c 'echo $MPI_ROOT && echo $LD_LIBRARY_PATH'
 

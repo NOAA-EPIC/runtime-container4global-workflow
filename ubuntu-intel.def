@@ -1,84 +1,63 @@
 Bootstrap: docker
 From: ubuntu:24.04
 
+%labels
+    Author yourname
+    OS Ubuntu 24.04
+    Intel-OneAPI 2024.2
+    Intel-MPI 2021.13
+
 %environment
-    # Set the root path for Intel installations
-    export INTEL_ROOT=/opt/intel
-    # Set up Intel oneAPI 2024.2.0 environment
-    . ${INTEL_ROOT}/oneapi/setvars.sh
-
-    # Variables for Intel MPI (part of oneAPI)
-    export MPI_ROOT=${INTEL_ROOT}/oneapi/mpi/2021.13.0
-    export PATH=${MPI_ROOT}/bin:${PATH}
-    export LD_LIBRARY_PATH=${MPI_ROOT}/lib/release:${LD_LIBRARY_PATH}
-
-    # Set up basic variables
-    export DEBIAN_FRONTEND=noninteractive
+    # Intel OneAPI environment vars (loaded on container start)
+    source /opt/intel/oneapi/setvars.sh > /dev/null 2>&1
+    export I_MPI_DEBUG=0
+    export FI_PROVIDER=psm3,shm
+    export PATH=/opt/intel/oneapi/mpi/2021.13.0/bin:$PATH
+    export LD_LIBRARY_PATH=/opt/intel/oneapi/mpi/2021.13.0/lib:$LD_LIBRARY_PATH
 
 %post
-    # 1. Update and install basic dependencies
-    apt-get update
-    apt-get install -y --no-install-recommends \
-        wget \
-        gpg \
+    export DEBIAN_FRONTEND=noninteractive
+
+    apt-get update && apt-get install -y \
         build-essential \
+        cmake \
+        git \
+        wget \
+        curl \
+        unzip \
         ca-certificates \
-        gcc \
-        g++ \
-        python3 \
-        libnuma-dev \
-        dirmngr \
-        apt-utils
+        python3 python3-pip python3-dev \
+        libnuma1 libnuma-dev \
+        libfabric1 libfabric-dev \
+        && apt-get clean
 
-    # Temporary step to find package versions:
-    # echo "--- Available MPI Versions ---"
-    # apt-cache madison intel-oneapi-mpi
+    # ----------------------------------------------------
+    # Install Intel OneAPI 2024.2.0 (Base + HPC Toolkits)
+    # ----------------------------------------------------
+    mkdir -p /tmp/oneapi
 
-    # --- DEBUGGING: Find the correct package name ---
-    echo "--- Searching for Intel oneAPI packages ---"
-    apt-cache search intel-oneapi-mpi
-    apt-cache search intel-oneapi-
-    echo "------------------------------------------"
+    # Intel public apt repository key
+    wget -qO - https://apt.repos.intel.com/intel-gpg-keys/Intel_GPG_Public_Key.tgz | \
+        tar --strip-components=1 -xzf - -C /tmp/oneapi
+    apt-key add /tmp/oneapi/*pub
 
-    # 2. Install Intel oneAPI Repository Key
-    wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | gpg --dearmor | tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
+    # Add Intel repo
+    echo "deb https://apt.repos.intel.com/oneapi all main" \
+        > /etc/apt/sources.list.d/oneAPI.list
 
-    # 3. Add Intel oneAPI Repository (for 2024.2.0)
-    echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | tee /etc/apt/sources.list.d/oneAPI.list
-
-    # 4. Install Intel oneAPI Base Toolkit (includes Intel MPI)
-    # The versioning below explicitly requests the 2024.2.0 version.
     apt-get update
 
-    # Temporary step to find package versions:
-    # echo "--- Available MPI Versions ---"
-    # apt-cache madison intel-oneapi-mpi
+    # Install OneAPI Base + HPC Toolkit (2024.2)
+    apt-get install -y \
+        intel-basekit \
+        intel-hpckit
 
-    # --- DEBUGGING: Find the correct package name ---
-    echo "--- Searching for Intel oneAPI packages ---"
-    apt-cache search intel-oneapi-mpi
-    apt-cache search intel-oneapi-
-    echo "------------------------------------------"
-
-    # Use the unversioned package names and specify the version using =
-    # Note: Intel MPI 2021.13 is often part of the 2024.2.0 release.
-    # We will use the common version-build string for 2024.2.0, which is typically 2024.2.0-64
-    INTEL_VERSION="2024.2.0-64"
-
-    apt-get install -y --no-install-recommends \
-        intel-oneapi-compiler-dpcpp-cpp=${INTEL_VERSION} \
-        intel-oneapi-compiler-fortran=${INTEL_VERSION} \
-        intel-oneapi-mpi=${INTEL_VERSION}
-
-    # 5. Clean up
-    apt-get autoremove -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    # ----------------------------------------------------
+    # Set persistent environment
+    # ----------------------------------------------------
+    echo "source /opt/intel/oneapi/setvars.sh" >> /environment
 
 %runscript
-    exec "$@"
+    echo "Intel OneAPI container (Ubuntu 24.04) - entering shell"
+    exec /bin/bash
 
-%labels
-    Maintainer "Your Name"
-    Version "1.0"
-    Description "Ubuntu 24.04 with Intel oneAPI 2024.2.0 and Intel MPI 2021.13"

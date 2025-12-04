@@ -1,0 +1,76 @@
+Bootstrap: docker
+From: rockylinux:9
+
+%environment
+    # Set the root path for Intel installations
+    export INTEL_ROOT=/opt/intel
+    # Source the environment variables for 2024.2.0
+    . ${INTEL_ROOT}/oneapi/setvars.sh
+
+    # Variables for Intel MPI (part of oneAPI)
+    export MPI_ROOT=${INTEL_ROOT}/oneapi/mpi/2021.13.0
+    export PATH=${MPI_ROOT}/bin:${PATH}
+    export LD_LIBRARY_PATH=${MPI_ROOT}/lib/release:${LD_LIBRARY_PATH}
+
+    # Set up basic variables
+    export PS1="[oneAPI-2024.2.0-LUA] \w \$ "
+
+%post
+    # 1. Update system and install basic tools
+    dnf update -y
+    dnf install -y --setopt=tsflags=nodocs \
+        wget \
+        gcc \
+        gcc-c++ \
+        make \
+        tar \
+        which \
+        python3 \
+        numactl
+
+    # 2. Install Lua and development headers (needed for Lmod or other tools)
+    # Enable CRB repo to find lua-devel
+    dnf install -y --enablerepo=crb --setopt=tsflags=nodocs lua lua-devel lua-libs
+
+    # 3. Add Intel oneAPI Repository (for RHEL/Rocky 9)
+    # Download the Intel repo setup script
+    wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB -O /etc/pki/rpm-gpg/RPM-GPG-KEY-intel-oneapi
+    
+    # Configure the YUM/DNF repository for oneAPI
+    echo "[oneAPI]" > /etc/yum.repos.d/oneAPI.repo
+    echo "name=Intel oneAPI repository" >> /etc/yum.repos.d/oneAPI.repo
+    echo "baseurl=https://yum.repos.intel.com/oneapi" >> /etc/yum.repos.d/oneAPI.repo
+    echo "gpgcheck=1" >> /etc/yum.repos.d/oneAPI.repo
+    echo "repo_gpgcheck=1" >> /etc/yum.repos.d/oneAPI.repo
+    echo "gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-intel-oneapi" >> /etc/yum.repos.d/oneAPI.repo
+    echo "enabled=1" >> /etc/yum.repos.d/oneAPI.repo
+
+    # 4. Install Intel oneAPI Toolkits
+    #INTEL_VERSION="2024.2.0-64"
+    
+    #dnf install -y --setopt=tsflags=nodocs \
+    #    intel-oneapi-compiler-dpcpp-cpp=${INTEL_VERSION} \
+    #    intel-oneapi-compiler-fortran=${INTEL_VERSION} \
+    #    intel-oneapi-mpi=${INTEL_VERSION}
+
+    dnf install -y --setopt=tsflags=nodocs \
+    intel-oneapi-compiler-dpcpp-cpp-2024.2 \
+    intel-oneapi-compiler-fortran-2024.2 \
+    intel-oneapi-mpi-2021.13 \
+    intel-oneapi-mpi-devel-2021.13
+
+    # 5. Clean up
+    dnf clean all
+    rm -rf /var/cache/dnf
+
+%runscript
+    # For user convenience, attempt to source the environment before executing the program
+    if [ -f "${INTEL_ROOT}/oneapi/setvars.sh" ]; then
+        . ${INTEL_ROOT}/oneapi/setvars.sh
+    fi
+    exec "$@"
+
+%labels
+    Maintainer "Wei Huang"
+    Version "1.0"
+    Description "Rocky 9 with Intel oneAPI 2024.2.0, Intel MPI 2021.13, and Lua"
