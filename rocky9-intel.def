@@ -22,11 +22,37 @@ From: rockylinux:9
         wget \
         gcc \
         gcc-c++ \
+        gfortran \
         make \
         tar \
+        xz \
+        rsync \
+        m4 \
+        git \
+        git-lfs \
         which \
         python3 \
+        procps-ng \
+        diffutils \
+        bzip2 \
+        patch \
+        unzip \
+        bzip2 \
+        file \
+        which \
         numactl
+
+    dnf install -y openmpi openmpi-devel
+    dnf install -y findutils openssh-clients
+
+    dnf install -y \
+        autoconf \
+        automake \
+        libtool \
+        m4
+    dnf install -y perl-FindBin
+    dnf install -y perl-core
+    dnf install -y flex
 
     # 2. Install Lua and development headers (needed for Lmod or other tools)
     # Enable CRB repo to find lua-devel
@@ -54,10 +80,10 @@ From: rockylinux:9
     #    intel-oneapi-mpi=${INTEL_VERSION}
 
     dnf install -y --setopt=tsflags=nodocs \
-    intel-oneapi-compiler-dpcpp-cpp-2024.2 \
-    intel-oneapi-compiler-fortran-2024.2 \
-    intel-oneapi-mpi-2021.13 \
-    intel-oneapi-mpi-devel-2021.13
+    intel-oneapi-compiler-dpcpp-cpp-2024.2.0 \
+    intel-oneapi-compiler-fortran-2024.2.0 \
+    intel-oneapi-mpi-2021.13.0 \
+    intel-oneapi-mpi-devel-2021.13.0
 
     # 5. Clean up
     dnf clean all

@@ -8,5 +8,7 @@ sif=intel-compiler-ss192
 img=./${sif}
 bindings="-B /contrib -B /lustre -B /bucket"
 
-sudo singularity shell --writable -e ${bindings} "${img}"
+#sudo singularity shell --writable -e ${bindings} "${img}"
+
+sudo singularity shell --writable -e ${bindings} rocky9-intel
 

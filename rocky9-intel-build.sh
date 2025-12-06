@@ -14,7 +14,7 @@
 
  set -x
 
-#sudo singularity build rocky9-intel.sif rocky9-intel.def
+ sudo singularity build rocky9-intel.sif rocky9-intel.def
  sudo singularity build --sandbox rocky9-intel rocky9-intel.sif
 
 #sudo singularity build ubuntu24-oneapi-2024.2-aws.sif ubuntu24-oneapi-2024.2-aws.def
